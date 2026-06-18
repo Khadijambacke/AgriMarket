@@ -1,34 +1,48 @@
-// const express = require('express');
-// const cors = require('cors');
-// require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
-// const sequelize = require('./src/config/database');
+const { sequelize } = require('./src/models');
+const authRoutes = require('./src/routes/auth.routes');
+const produitRoutes = require('./src/routes/produit.routes');
 
-// const app = express();
-// const PORT = process.env.PORT || 3000;
+const app = express();
 
-// // ─── Middlewares ───────────────────────────────────────────────
-// app.use(cors());
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+// Middleware
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+}));
+app.use(express.json());
 
-// // ─── Route de test ────────────────────────────────────────────
-// app.get('/', (req, res) => {
-//   res.json({
-//     message: '✅ AgriMarket API fonctionne !',
-//     version: '1.0.0',
-//   });
-// });
+// Documentation Swagger (Optionnel)
+try {
+  const swaggerUi = require('swagger-ui-express');
+  const swaggerSpec = require('./src/config/swagger');
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: 'AgriMarket API Docs',
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  }));
+} catch (error) {
+  console.log('Swagger documentation not loaded. Ignored.');
+}
 
-// // ─── Démarrage du serveur + connexion BDD ─────────────────────
-// sequelize
-//   .authenticate()
-//   .then(() => {
-//     console.log('✅ Connexion à la base de données réussie !');
-//     app.listen(PORT, () => {
-//       console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-//     });
-//   })
-//   .catch((err) => {
-//     console.error('❌ Impossible de se connecter à la base de données :', err.message);
-//   });
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/produits', produitRoutes);
+
+// Synchronisation base de données et lancement du serveur
+const PORT = process.env.PORT || 3000;
+
+sequelize.authenticate()
+  .then(() => {
+    console.log('Connexion à la base de données réussie.');
+    // On peut utiliser .sync({ alter: true }) pour synchroniser les modèles si besoin
+    app.listen(PORT, () => {
+      console.log(`Serveur démarré sur le port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Impossible de se connecter à la base de données:', err);
+  });

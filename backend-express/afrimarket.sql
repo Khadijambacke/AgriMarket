@@ -150,9 +150,7 @@ CREATE TABLE evaluations (
 ) ENGINE=InnoDB;
 
 
--- ============================================================
--- DONNÉES DE TEST — Catégories
--- ============================================================
+
 INSERT INTO categories (nom, slug, icone, categorie_parente_id) VALUES
 ('Légumes',    'legumes',    '🥦', NULL),
 ('Fruits',     'fruits',     '🍊', NULL),
