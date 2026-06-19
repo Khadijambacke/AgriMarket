@@ -40,6 +40,8 @@ const authenticate = require('../middleware/auth');
  *         description: Erreur de validation des données
  */
 router.post('/register', [ 
+  //la verification en 2 etapes de express:sur les routes et s'il capture
+  //une erreur c'est au niveu du controller qu'on le saura 
   body('nom').notEmpty().withMessage('Le nom est requis.'), 
   body('prenom').notEmpty().withMessage('Le prénom est requis.'), 
   body('email').isEmail().withMessage('Email invalide.'), 
