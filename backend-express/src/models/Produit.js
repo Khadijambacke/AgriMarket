@@ -49,7 +49,7 @@ const Produit = sequelize.define('Produit', {
   },
   date_recolte: {
     type: DataTypes.DATEONLY,
-    allowNull: true,
+    allowNull: false,
   },
   date_expiration: {
     type: DataTypes.DATEONLY,
