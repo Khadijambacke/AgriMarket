@@ -6,6 +6,7 @@ const { sequelize } = require('./src/models');
 const authRoutes = require('./src/routes/auth.routes');
 const produitRoutes = require('./src/routes/produit.routes');
 const categorieRoutes = require('./src/routes/categorie.routes');
+const commandeRoutes = require('./src/routes/commande.routes');
 
 const app = express();
 
@@ -33,6 +34,7 @@ try {
 app.use('/api/auth', authRoutes);
 app.use('/api/produits', produitRoutes);
 app.use('/api/categories', categorieRoutes);
+app.use('/api/commandes', commandeRoutes);
 
 // Synchronisation base de données et lancement du serveur
 const PORT = process.env.PORT || 3000;

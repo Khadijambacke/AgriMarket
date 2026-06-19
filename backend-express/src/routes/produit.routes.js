@@ -73,7 +73,34 @@ router.get('/:id', show);
  *       403:
  *         description: Accès refusé (Rôle insuffisant)
  */
-router.post('/', authenticate, role('producteur', 'admin'), store);
+const validateProduit = [
+  body('categorie_id').isInt().withMessage('La catégorie doit être un entier valide.'),
+  body('libelle').trim().notEmpty().withMessage('Le nom du produit est requis.').isLength({ max: 150 }).withMessage('Le libellé ne doit pas dépasser 150 caractères.'),
+  body('prix_unitaire').isFloat({ min: 0 }).withMessage('Le prix unitaire doit être un nombre positif.'),
+  body('unite').isIn(['kg', 'tonne', 'sac', 'caisse', 'botte', 'litre']).withMessage('Unité non valide (kg, tonne, sac, caisse, botte, litre).'),
+  body('quantite_disponible').isFloat({ min: 0 }).withMessage('La quantité disponible doit être un nombre positif.'),
+  body('quantite_min_commande').optional().isFloat({ min: 0 }).withMessage('La quantité minimale de commande doit être un nombre positif.'),
+  body('region').optional().trim().isLength({ max: 100 }).withMessage('La région ne doit pas dépasser 100 caractères.'),
+  body('ville').optional().trim().isLength({ max: 100 }).withMessage('La ville ne doit pas dépasser 100 caractères.'),
+  body('date_recolte').optional().isISO8601().toDate().withMessage('La date de récolte doit être une date valide (AAAA-MM-JJ).'),
+  body('date_expiration').optional().isISO8601().toDate().withMessage("La date d'expiration doit être une date valide (AAAA-MM-JJ).")
+];
+
+const validateProduitUpdate = [
+  body('categorie_id').optional().isInt().withMessage('La catégorie doit être un entier valide.'),
+  body('libelle').optional().trim().notEmpty().withMessage('Le nom du produit ne peut pas être vide.').isLength({ max: 150 }).withMessage('Le libellé ne doit pas dépasser 150 caractères.'),
+  body('prix_unitaire').optional().isFloat({ min: 0 }).withMessage('Le prix unitaire doit être un nombre positif.'),
+  body('unite').optional().isIn(['kg', 'tonne', 'sac', 'caisse', 'botte', 'litre']).withMessage('Unité non valide (kg, tonne, sac, caisse, botte, litre).'),
+  body('quantite_disponible').optional().isFloat({ min: 0 }).withMessage('La quantité disponible doit être un nombre positif.'),
+  body('quantite_min_commande').optional().isFloat({ min: 0 }).withMessage('La quantité minimale de commande doit être un nombre positif.'),
+  body('region').optional().trim().isLength({ max: 100 }).withMessage('La région ne doit pas dépasser 100 caractères.'),
+  body('ville').optional().trim().isLength({ max: 100 }).withMessage('La ville ne doit pas dépasser 100 caractères.'),
+  body('date_recolte').optional().isISO8601().toDate().withMessage('La date de récolte doit être une date valide (AAAA-MM-JJ).'),
+  body('date_expiration').optional().isISO8601().toDate().withMessage("La date d'expiration doit être une date valide (AAAA-MM-JJ)."),
+  body('statut').optional().isIn(['disponible', 'epuise', 'suspendu']).withMessage('Statut non valide.')
+];
+
+router.post('/', authenticate, role('producteur', 'admin'), validateProduit, store);
 
 // * @swagger
 //  * /api/produits/{id}:
@@ -107,11 +134,7 @@ router.post('/', authenticate, role('producteur', 'admin'), store);
 //  *       403:
 //  *         description: Accès refusé (Rôle insuffisant)
 //  */
-router.put('/:id', authenticate, role('producteur', 'admin'), [
-    // Ici on vérifie les champs d'un Produit !
-    body('libelle').optional().notEmpty().withMessage('Le nom du produit ne peut pas être vide.'),
-    body('prix_unitaire').optional().isFloat({ min: 0 }).withMessage('Le prix doit être positif.'),
-], update);
+router.put('/:id', authenticate, role('producteur', 'admin'), validateProduitUpdate, update);
 
 router.delete('/:id', authenticate, role('producteur', 'admin'), destroy);
 

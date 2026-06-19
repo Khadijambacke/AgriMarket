@@ -81,7 +81,9 @@ const store = async (req, res) => {
       quantite_disponible,
       quantite_min_commande,
       region,
-      ville
+      ville,
+      date_recolte,
+      date_expiration
     } = req.body;
     ///req.body:indice duu carton
     ///mon body devrait recevoir ca l'equivalent de valedated de laravel
@@ -101,6 +103,8 @@ const store = async (req, res) => {
       quantite_min_commande: quantite_min_commande || 1,
       region,
       ville,
+      date_recolte,
+      date_expiration,
       statut: 'disponible'
     });
 
@@ -143,6 +147,8 @@ const update = async (req, res) => {
       quantite_min_commande,
       region,
       ville,
+      date_recolte,
+      date_expiration,
       statut // Le producteur a peut-être le droit de le mettre en 'indisponible'
     } = req.body;
 
@@ -159,6 +165,8 @@ const update = async (req, res) => {
       quantite_min_commande: quantite_min_commande || produit.quantite_min_commande,
       region: region || produit.region,
       ville: ville || produit.ville,
+      date_recolte: date_recolte || produit.date_recolte,
+      date_expiration: date_expiration !== undefined ? date_expiration : produit.date_expiration,
       statut: statut || produit.statut
     });
 
