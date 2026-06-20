@@ -3,6 +3,16 @@ const { body } = require('express-validator');
 const router = express.Router(); 
 const { register, login, logout, me } = require('../controllers/auth.controller'); 
 const authenticate = require('../middleware/auth'); 
+const rateLimit = require('express-rate-limit');
+
+// 🛡️ Création du "Vigile" pour le Login (Rate Limiting)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limite chaque IP à 5 requêtes par fenêtre de 15 minutes
+  message: { 
+    message: 'Trop de tentatives de connexion, veuillez réessayer dans 15 minutes.' 
+  }
+});
 
 /**
  * @swagger
@@ -74,7 +84,8 @@ router.post('/register', [
  *         description: Identifiants invalides
  */
 // POST /api/v1/login 
-router.post('/login', [ 
+// On place le "loginLimiter" ici pour qu'il s'exécute avant le reste
+router.post('/login', loginLimiter, [ 
   body('email').isEmail(), 
   body('password').notEmpty(), 
 ], login); 

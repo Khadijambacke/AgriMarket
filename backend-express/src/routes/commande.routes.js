@@ -3,6 +3,15 @@ const router = express.Router();
 const { body } = require('express-validator');
 const { store, index, show, updateStatus } = require('../controllers/commande.controller');
 const authenticate = require('../middleware/auth');
+const rateLimit = require('express-rate-limit');
+///limite des commades par minute par personne
+const commandeLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // Limite chaque IP à 5 commandes par minute (anti-spam de commandes)
+  message: { 
+    message: 'Vous passez des commandes trop rapidement, veuillez patienter une minute.' 
+  }
+});
 
 /**
  * @swagger
@@ -64,7 +73,8 @@ const authenticate = require('../middleware/auth');
  *       500:
  *         description: Erreur serveur
  */
-router.post('/', authenticate, [
+// On place le "commandeLimiter" ici pour qu'il s'exécute avant de traiter la commande
+router.post('/', authenticate, commandeLimiter, [
   body('producteur_id').isInt().withMessage('L’ID du producteur doit être un entier valide.'),
   body('adresse_livraison').optional().trim().notEmpty().withMessage('L’adresse de livraison ne peut pas être vide si spécifiée.'),
   body('notes').optional().trim(),
