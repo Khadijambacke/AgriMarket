@@ -4,6 +4,7 @@ const { index, show, store, update, destroy } = require('../controllers/produit.
 const { body } = require('express-validator');
 const authenticate = require('../middleware/auth');
 const role = require('../middleware/role');
+const upload = require('../middleware/upload');
 
 //Elle définit la liste des règles à vérifier.
 //  Elle ne bloque rien, elle note juste les infractions dans un coin de la requête (req).
@@ -100,7 +101,7 @@ const validateProduitUpdate = [
   body('statut').optional().isIn(['disponible', 'epuise', 'suspendu']).withMessage('Statut non valide.')
 ];
 
-router.post('/', authenticate, role('producteur', 'admin'), validateProduit, store);
+router.post('/', authenticate, role('producteur', 'admin'), upload.single('image'), validateProduit, store);
 
 // * @swagger
 //  * /api/produits/{id}:
@@ -134,7 +135,7 @@ router.post('/', authenticate, role('producteur', 'admin'), validateProduit, sto
 //  *       403:
 //  *         description: Accès refusé (Rôle insuffisant)
 //  */
-router.put('/:id', authenticate, role('producteur', 'admin'), validateProduitUpdate, update);
+router.put('/:id', authenticate, role('producteur', 'admin'), upload.single('image'), validateProduitUpdate, update);
 
 router.delete('/:id', authenticate, role('producteur', 'admin'), destroy);
 

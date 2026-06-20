@@ -1,10 +1,43 @@
 const { Produit, Categorie, User } = require('../models');
 const { validationResult } = require('express-validator');
+const { Op } = require('sequelize');
 
 const index = async (req, res) => {
   try {
-    const produits = await Produit.findAll({
-      where: { statut: 'disponible' },
+    const { 
+      page = 1, 
+      limit = 10, 
+      search, 
+      categorie_id, 
+      region, 
+      min_prix, 
+      max_prix 
+    } = req.query;
+
+    const offset = (page - 1) * limit;
+    
+    // Construction dynamique du filtre
+    let whereCondition = { statut: 'disponible' };
+
+    if (search) {
+      whereCondition.libelle = { [Op.like]: `%${search}%` };
+    }
+    if (categorie_id) {
+      whereCondition.categorie_id = categorie_id;
+    }
+    if (region) {
+      whereCondition.region = { [Op.like]: `%${region}%` };
+    }
+    if (min_prix || max_prix) {
+      whereCondition.prix_unitaire = {};
+      if (min_prix) whereCondition.prix_unitaire[Op.gte] = min_prix;
+      if (max_prix) whereCondition.prix_unitaire[Op.lte] = max_prix;
+    }
+
+    const { count, rows: produits } = await Produit.findAndCountAll({
+      where: whereCondition,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       include: [
         {
           model: Categorie,
@@ -17,12 +50,17 @@ const index = async (req, res) => {
           attributes: ['id', 'nom', 'prenom', 'telephone', 'adresse'],
         }
       ],
-      //trier par date d'ajout
       order: [['created_at', 'DESC']],
     });
+
     return res.status(200).json({
       message: 'Liste des produits',
-      data: produits
+      data: produits,
+      meta: {
+        totalItems: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: parseInt(page)
+      }
     });
   } catch (error) {
     console.error('Erreur produit.index:', error);
@@ -91,6 +129,9 @@ const store = async (req, res) => {
     // Le producteur est l'utilisateur connecté
     const producteur_id = req.user.id;
 
+    // Gestion de l'image
+    const image_url = req.file ? `/uploads/produits/${req.file.filename}` : null;
+
     const produit = await Produit.create({
       producteur_id,
       categorie_id,
@@ -99,13 +140,13 @@ const store = async (req, res) => {
       prix_unitaire,
       unite,
       quantite_disponible,
-      //||1 valeur par defaut du  quantite
       quantite_min_commande: quantite_min_commande || 1,
       region,
       ville,
       date_recolte,
       date_expiration,
-      statut: 'disponible'
+      statut: 'disponible',
+      image_url
     });
 
     return res.status(201).json({ message: 'Produit créé avec succès.', data: produit });
@@ -167,7 +208,8 @@ const update = async (req, res) => {
       ville: ville || produit.ville,
       date_recolte: date_recolte || produit.date_recolte,
       date_expiration: date_expiration !== undefined ? date_expiration : produit.date_expiration,
-      statut: statut || produit.statut
+      statut: statut || produit.statut,
+      image_url: req.file ? `/uploads/produits/${req.file.filename}` : produit.image_url
     });
 
     return res.status(200).json({ message: 'Produit mis à jour avec succès.', data: produit });
