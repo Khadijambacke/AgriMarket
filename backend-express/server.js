@@ -9,13 +9,12 @@ const produitRoutes = require('./src/routes/produit.routes');
 const categorieRoutes = require('./src/routes/categorie.routes');
 const commandeRoutes = require('./src/routes/commande.routes');
 const evaluationRoutes = require('./src/routes/evaluation.routes');
+const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-}));
+app.use(cors()); // Autorise tous les domaines en local pour faciliter le développement
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
@@ -39,6 +38,9 @@ app.use('/api/produits', produitRoutes);
 app.use('/api/categories', categorieRoutes);
 app.use('/api/commandes', commandeRoutes);
 app.use('/api/evaluations', evaluationRoutes);
+
+// Middleware de gestion globale des erreurs (doit être le dernier middleware `app.use`)
+app.use(errorHandler);
 
 // Synchronisation base de données et lancement du serveur
 const PORT = process.env.PORT || 3000;
