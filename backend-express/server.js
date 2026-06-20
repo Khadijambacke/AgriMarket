@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/auth.routes');
 const produitRoutes = require('./src/routes/produit.routes');
 const categorieRoutes = require('./src/routes/categorie.routes');
 const commandeRoutes = require('./src/routes/commande.routes');
+const evaluationRoutes = require('./src/routes/evaluation.routes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/produits', produitRoutes);
 app.use('/api/categories', categorieRoutes);
 app.use('/api/commandes', commandeRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 
 // Synchronisation base de données et lancement du serveur
 const PORT = process.env.PORT || 3000;

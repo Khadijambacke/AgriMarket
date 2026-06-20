@@ -45,7 +45,7 @@ const show = async (req, res) => {
 
 // Ajouter une nouvelle catégorie
 const store = async (req, res) => {
-  // 1. La douane : vérification des erreurs
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({
@@ -67,14 +67,12 @@ const store = async (req, res) => {
       icone,
       categorie_parente_id
     });
-
     return res.status(201).json({ message: 'Catégorie créée avec succès.', data: categorie });
   } catch (error) {
     console.error('Erreur categorie.store:', error);
     return res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
-
 // Modifier une catégorie
 const update = async (req, res) => {
   const errors = validationResult(req);
