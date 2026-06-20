@@ -9,6 +9,7 @@ const index = async (req, res) => {
       limit = 10, 
       search, 
       categorie_id, 
+      producteur_id,
       region, 
       min_prix, 
       max_prix 
@@ -24,6 +25,9 @@ const index = async (req, res) => {
     }
     if (categorie_id) {
       whereCondition.categorie_id = categorie_id;
+    }
+    if (producteur_id) {
+      whereCondition.producteur_id = producteur_id;
     }
     if (region) {
       whereCondition.region = { [Op.like]: `%${region}%` };
@@ -89,7 +93,6 @@ const show = async (req, res) => {
     if (!produit) {
       return res.status(404).json({ message: 'Produit introuvable.' });
     }
-
     return res.status(200).json({ message: 'Détail du produit.', data: produit });
   } catch (error) {
     console.error('Erreur produit.show:', error);
@@ -221,7 +224,7 @@ const update = async (req, res) => {
 
 const destroy = async (req, res) => {
   try {
-    // Méthode du prof : Recherche et vérification de sécurité en une seule ligne
+    
     const produit = await Produit.findOne({
       where: { id: req.params.id, producteur_id: req.user.id }
     });

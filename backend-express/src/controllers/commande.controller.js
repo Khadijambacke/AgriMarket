@@ -1,7 +1,6 @@
 const { Commande, LigneCommande, Produit, User, HistoriqueStatut, sequelize } = require('../models');
 const { validationResult } = require('express-validator');
 
-// 1. Passer une nouvelle commande (Acheteur)
 const store = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -33,14 +32,14 @@ const store = async (req, res) => {
     for (const ligne of lignes) {
       const { produit_id, quantite } = ligne;
 
-      // Récupérer le produit dans la transaction
+      
       const produit = await Produit.findByPk(produit_id, { transaction: t });
       if (!produit) {
         await t.rollback();
         return res.status(404).json({ message: `Le produit avec  est introuvable.` });
       }
 
-      // Vérifier que le produit appartient bien au producteur spécifié
+     
       if (produit.producteur_id !== parseInt(producteur_id)) {
         await t.rollback();
         return res.status(400).json({
@@ -108,6 +107,7 @@ const store = async (req, res) => {
       ...l,
       commande_id: commande.id,
     }));
+    //la transaction pour pouvoir faire des rollback
     await LigneCommande.bulkCreate(lignesFinales, { transaction: t });
 
     // 3. Mettre à jour les stocks des produits
